@@ -1,26 +1,35 @@
-
-var Emitter = require('..');
+import {
+  describe,
+  it,
+} from "https://deno.land/x/test_suite@0.9.0/mod.ts";
+import {
+  assertArrayIncludes,
+  assertEquals
+} from "https://deno.land/std@0.108.0/testing/asserts.ts";
+import { Emitter } from '../index.js';
 
 function Custom() {
   Emitter.call(this)
 }
 
-Custom.prototype.__proto__ = Emitter.prototype;
+Custom.prototype = Emitter.prototype;
+
 
 describe('Custom', function(){
   describe('with Emitter.call(this)', function(){
-    it('should work', function(done){
+    it('should work', function(){
       var emitter = new Custom;
-      emitter.on('foo', done);
+      emitter.on('foo', () => console.log("Done"));
       emitter.emit('foo');
     })
   })
 })
 
+
 describe('Emitter', function(){
   describe('.on(event, fn)', function(){
     it('should add listeners', function(){
-      var emitter = new Emitter;
+      var emitter = new Emitter();
       var calls = [];
 
       emitter.on('foo', function(val){
@@ -35,11 +44,11 @@ describe('Emitter', function(){
       emitter.emit('bar', 1);
       emitter.emit('foo', 2);
 
-      calls.should.eql([ 'one', 1, 'two', 1, 'one', 2, 'two', 2 ]);
+      assertArrayIncludes(calls,[ 'one', 1, 'two', 1, 'one', 2, 'two', 2 ]);
     })
 
     it('should add listeners for events which are same names with methods of Object.prototype', function(){
-      var emitter = new Emitter;
+      var emitter = new Emitter();
       var calls = [];
 
       emitter.on('constructor', function(val){
@@ -53,13 +62,13 @@ describe('Emitter', function(){
       emitter.emit('constructor', 1);
       emitter.emit('__proto__', 2);
 
-      calls.should.eql([ 'one', 1, 'two', 2 ]);
+      assertArrayIncludes(calls,[ 'one', 1, 'two', 2 ]);
     })
   })
 
   describe('.once(event, fn)', function(){
     it('should add a single-shot listener', function(){
-      var emitter = new Emitter;
+      var emitter = new Emitter();
       var calls = [];
 
       emitter.once('foo', function(val){
@@ -71,13 +80,13 @@ describe('Emitter', function(){
       emitter.emit('foo', 3);
       emitter.emit('bar', 1);
 
-      calls.should.eql([ 'one', 1 ]);
+      assertArrayIncludes(calls,[ 'one', 1 ]);
     })
   })
 
   describe('.off(event, fn)', function(){
     it('should remove a listener', function(){
-      var emitter = new Emitter;
+      var emitter = new Emitter();
       var calls = [];
 
       function one() { calls.push('one'); }
@@ -89,11 +98,11 @@ describe('Emitter', function(){
 
       emitter.emit('foo');
 
-      calls.should.eql([ 'one' ]);
+      assertArrayIncludes(calls,[ 'one' ]);
     })
 
     it('should work with .once()', function(){
-      var emitter = new Emitter;
+      var emitter = new Emitter();
       var calls = [];
 
       function one() { calls.push('one'); }
@@ -104,7 +113,7 @@ describe('Emitter', function(){
 
       emitter.emit('foo');
 
-      calls.should.eql([]);
+      assertArrayIncludes(calls,[]);
     })
 
     it('should work when called from an event', function(){
@@ -118,16 +127,18 @@ describe('Emitter', function(){
       });
       emitter.on('tobi', b);
       emitter.emit('tobi');
-      called.should.be.true;
+      assertEquals(called, true);
+
       called = false;
       emitter.emit('tobi');
-      called.should.be.false;
+
+      assertEquals(called, false);
     });
   })
 
   describe('.off(event)', function(){
     it('should remove all listeners for an event', function(){
-      var emitter = new Emitter;
+      var emitter = new Emitter();
       var calls = [];
 
       function one() { calls.push('one'); }
@@ -140,11 +151,11 @@ describe('Emitter', function(){
       emitter.emit('foo');
       emitter.emit('foo');
 
-      calls.should.eql([]);
+      assertArrayIncludes(calls,[]);
     })
 
     it('should remove event array to avoid memory leak', function() {
-      var emitter = new Emitter;
+      var emitter = new Emitter();
       var calls = [];
 
       function cb() {}
@@ -152,11 +163,14 @@ describe('Emitter', function(){
       emitter.on('foo', cb);
       emitter.off('foo', cb);
 
-      emitter._callbacks.should.not.have.property('$foo');
+      console.log('emitter._callbacks[NOT]', emitter._callbacks);
+
+      assertEquals(emitter._callbacks['$foo'], undefined);
+
     })
 
     it('should only remove the event array when the last subscriber unsubscribes', function() {
-      var emitter = new Emitter;
+      var emitter = new Emitter();
       var calls = [];
 
       function cb1() {}
@@ -166,13 +180,15 @@ describe('Emitter', function(){
       emitter.on('foo', cb2);
       emitter.off('foo', cb1);
 
-      emitter._callbacks.should.have.property('$foo');
+      assertEquals(Object.keys(emitter._callbacks), ['$foo']);
+
+
     })
   })
 
   describe('.off()', function(){
     it('should remove all listeners', function(){
-      var emitter = new Emitter;
+      var emitter = new Emitter();
       var calls = [];
 
       function one() { calls.push('one'); }
@@ -189,24 +205,24 @@ describe('Emitter', function(){
       emitter.emit('foo');
       emitter.emit('bar');
 
-      calls.should.eql(['one', 'two']);
+      assertArrayIncludes(calls,['one', 'two']);
     })
   })
 
   describe('.listeners(event)', function(){
     describe('when handlers are present', function(){
       it('should return an array of callbacks', function(){
-        var emitter = new Emitter;
+        var emitter = new Emitter();
         function foo(){}
         emitter.on('foo', foo);
-        emitter.listeners('foo').should.eql([foo]);
+        assertArrayIncludes(emitter.listeners('foo'), [foo])
       })
     })
 
     describe('when no handlers are present', function(){
       it('should return an empty array', function(){
-        var emitter = new Emitter;
-        emitter.listeners('foo').should.eql([]);
+        var emitter = new Emitter();
+        assertArrayIncludes(emitter.listeners('foo'), [])
       })
     })
   })
@@ -214,26 +230,21 @@ describe('Emitter', function(){
   describe('.hasListeners(event)', function(){
     describe('when handlers are present', function(){
       it('should return true', function(){
-        var emitter = new Emitter;
+        var emitter = new Emitter();
         emitter.on('foo', function(){});
-        emitter.hasListeners('foo').should.be.true;
+        assertEquals(emitter.hasListeners('foo'), true);
       })
     })
 
     describe('when no handlers are present', function(){
       it('should return false', function(){
-        var emitter = new Emitter;
-        emitter.hasListeners('foo').should.be.false;
+        var emitter = new Emitter();
+        assertEquals(emitter.hasListeners('foo'), false);
+
       })
     })
   })
 })
 
-describe('Emitter(obj)', function(){
-  it('should mixin', function(done){
-    var proto = {};
-    Emitter(proto);
-    proto.on('something', done);
-    proto.emit('something');
-  })
-})
+
+

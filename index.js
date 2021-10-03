@@ -1,11 +1,5 @@
 
-/**
- * Expose `Emitter`.
- */
 
-if (typeof module !== 'undefined') {
-  module.exports = Emitter;
-}
 
 /**
  * Initialize a new `Emitter`.
@@ -173,3 +167,11 @@ Emitter.prototype.listeners = function(event){
 Emitter.prototype.hasListeners = function(event){
   return !! this.listeners(event).length;
 };
+
+
+
+/**
+ * Expose `Emitter`.
+ */
+
+ export {Emitter};

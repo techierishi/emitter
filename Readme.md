@@ -1,12 +1,4 @@
-# Emitter [![Build Status](https://travis-ci.org/component/emitter.png)](https://travis-ci.org/component/emitter)
-
-  Event emitter component.
-
-## Installation
-
-```
-$ component install component/emitter
-```
+Event emitter component.
 
 ## API
 
