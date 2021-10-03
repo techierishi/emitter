@@ -6,7 +6,7 @@ import {
   assertArrayIncludes,
   assertEquals
 } from "https://deno.land/std@0.108.0/testing/asserts.ts";
-import { Emitter } from '../index.js';
+import { Emitter } from 'https://deno.land/x/emitter@1.0.0/index.js';
 
 function Custom() {
   Emitter.call(this)

@@ -11,16 +11,16 @@ Event emitter component.
   As an `Emitter` instance:
 
 ```js
-var Emitter = require('emitter');
-var emitter = new Emitter;
+import { Emitter } from 'https://deno.land/x/emitter@1.0.0/index.js';
+const emitter = new Emitter;
 emitter.emit('something');
 ```
 
   As a mixin:
 
 ```js
-var Emitter = require('emitter');
-var user = { name: 'tobi' };
+import { Emitter } from 'https://deno.land/x/emitter@1.0.0/index.js';
+const user = { name: 'tobi' };
 Emitter(user);
 
 user.emit('im a user');
@@ -29,7 +29,7 @@ user.emit('im a user');
   As a prototype mixin:
 
 ```js
-var Emitter = require('emitter');
+import { Emitter } from 'https://deno.land/x/emitter@1.0.0/index.js';
 Emitter(User.prototype);
 ```
 
